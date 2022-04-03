@@ -14,18 +14,17 @@ class UpgradePluginsOlid65(c4d.plugins.CommandData):
         
     def Execute(self, doc):       
         path_dst = os.path.join(c4d.storage.GeGetStartupWritePath(),'plugins')
-        path_dst = '/Users/olivierdonze/Documents/TEMP/Test_import_plugins_olid65'
-        name_file='__lst_url__.json'
-        fn_urls = os.path.join(os.path.dirname(__file__),name_file)
-        if not os.path.isfile(fn_urls):
-            c4d.gui.MessageDialog(f"Le fichier {name_file} n'existe pas, mise à jour impossible !")
-            return False
-        
+        #for tests
+        #path_dst = '/Users/olivierdonze/Documents/TEMP/Test_import_plugins_olid65'
+
+        #le plugin va directement prendre le fichier json sur le dépot github 
+        # (pour éviter la mise à jour -> mais ne pas oublier de faire des commits + push
+        # si on veut mettre à jour le json)
         urls = None
-        with open(fn_urls,'r') as f:
-            urls = json.loads(f.read())
-            for url in urls:
-                print(url)
+        fn_urls_update = 'https://raw.githubusercontent.com/olid65/update_plugins_c4d_olid65/main/__lst_url__.json?'
+        with urlopen(fn_urls_update) as response:
+            urls = json.loads(response.read())
+
         if not urls:
             c4d.gui.MessageDialog("Pas d'urls, mise à jour impossible !")
             return False
