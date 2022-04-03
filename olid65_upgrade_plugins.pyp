@@ -33,9 +33,12 @@ class UpgradePluginsOlid65(c4d.plugins.CommandData):
         if not rep: return
 
         for url in urls:
-            with urlopen(url) as zipresp:
-                with ZipFile(BytesIO(zipresp.read())) as zfile:
-                    zfile.extractall(path_dst)
+            try :
+                with urlopen(url) as zipresp:
+                    with ZipFile(BytesIO(zipresp.read())) as zfile:
+                        zfile.extractall(path_dst)
+            except:
+                print(f"Problème à l'url : {url}")
 
         with urlopen(url) as zipresp:
             with ZipFile(BytesIO(zipresp.read())) as zfile:
