@@ -5,6 +5,7 @@ from io import BytesIO
 from zipfile import ZipFile
 from pprint import pprint
 import shutil
+import json
 
 # Be sure to use a unique ID obtained from www.plugincafe.com
 PLUGIN_ID = 1059297
@@ -14,12 +15,20 @@ class UpgradePluginsOlid65(c4d.plugins.CommandData):
     def Execute(self, doc):       
         path_dst = os.path.join(c4d.storage.GeGetStartupWritePath(),'plugins')
         path_dst = '/Users/olivierdonze/Documents/TEMP/Test_import_plugins_olid65'
-
-        urls = ['https://github.com/olid65/C4D_import_dwg_georef/archive/refs/heads/main.zip',
-                'https://github.com/olid65/ESRI_extractor/archive/refs/heads/main.zip',
-                'https://github.com/olid65/SITG_C4D/archive/refs/heads/master.zip',
-                'https://github.com/olid65/swisstopo_extractor/archive/refs/heads/master.zip'
-            ]
+        name_file='__lst_url__.json'
+        fn_urls = os.path.join(os.path.dirname(__file__),name_file)
+        if not os.path.isfile(fn_urls):
+            c4d.gui.MessageDialog(f"Le fichier {name_file} n'existe pas, mise à jour impossible !")
+            return False
+        
+        urls = None
+        with open(fn_urls,'r') as f:
+            urls = json.loads(f.read())
+            for url in urls:
+                print(url)
+        if not urls:
+            c4d.gui.MessageDialog("Pas d'urls, mise à jour impossible !")
+            return False
         
         rep = c4d.gui.QuestionDialog(f"Attention, l'opération va remplacer tous les plugins d'olid65 contenus dans {path_dst}.\n\nVoulez-vous vraiment continuer ?")
         if not rep: return
