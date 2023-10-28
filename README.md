@@ -1,9 +1,9 @@
 ## Installation
-Téléchargez le fichier zip ci-dessus.
+[Téléchargez le fichier zip.](https://github.com/olid65/update_plugins_c4d_olid65/archive/refs/heads/main.zip)
 
 Installez le dossier dézippé sous :
-- sur MAC : /Users/VOTRE_USERNAME/Library/Preferences/Maxon/Maxon Cinema 4D XXXX_XXXXX/plugins
-- sur PC : C:\Users\VOTRE_USERNAME\AppData\Roaming\Maxon\Maxon Cinema 4D XXXX_XXXXX\plugins
+- sur MAC : */Users/VOTRE_USERNAME/Library/Preferences/Maxon/Maxon Cinema 4D XXXX_XXXXX/plugins*
+- sur PC : *C:\Users\VOTRE_USERNAME\AppData\Roaming\Maxon\Maxon Cinema 4D XXXX_XXXXX\plugins*
 - sinon dans Cinema 4D, allez dans le menu *Edition/Préférences générales* et cliquez sur le bouton *Dossier des préférences* en bas à gauche de la fenêtre puis ouvrez le dossier *plugins*
 
 Si Cinema 4D est ouvert vous devrez le fermer et l'ouvrir à nouveau
