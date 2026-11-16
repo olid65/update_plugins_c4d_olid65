@@ -4,7 +4,10 @@ import re
 import shutil
 import socket
 import ssl
+import subprocess
+import sys
 import tempfile
+from contextlib import contextmanager
 from pathlib import Path, PureWindowsPath
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlsplit
@@ -16,6 +19,39 @@ import c4d
 PLUGIN_ID = 1059297
 CATALOG = "https://raw.githubusercontent.com/olid65/update_plugins_c4d_olid65/main/__lst_url__.json"
 status = c4d.gui if hasattr(c4d.gui, "StatusSetBar") else c4d
+
+
+@contextmanager
+def open_download(url, timeout):
+    try:
+        response = urlopen(url, timeout=timeout)
+    except (URLError, ssl.SSLCertVerificationError) as error:
+        if not isinstance(getattr(error, "reason", error), ssl.SSLCertVerificationError):
+            raise
+        if sys.platform == "win32":
+            curl = Path(os.environ["SystemRoot"]) / "System32" / "curl.exe"
+        elif sys.platform == "darwin":
+            curl = Path("/usr/bin/curl")
+        else:
+            raise
+        if not curl.is_file():
+            raise
+        with tempfile.TemporaryFile() as output:
+            result = subprocess.run(
+                [str(curl), "--disable", "--silent", "--show-error", "--fail",
+                 "--location", "--proto", "=https", "--proto-redir", "=https",
+                 "--connect-timeout", str(timeout), "--max-time", str(timeout * 4), url],
+                stdout=output, stderr=subprocess.PIPE,
+                creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+            if result.returncode:
+                detail = result.stderr.decode(errors="replace").strip()
+                raise OSError(f"{explain(error)}\nDeuxième essai avec curl système : {detail}") from error
+            size = output.tell()
+            output.seek(0)
+            yield output, size
+        return
+    with response:
+        yield response, int(response.headers.get("Content-Length") or 0)
 
 
 def explain(error):
@@ -40,7 +76,7 @@ def explain(error):
 
 def catalog():
     try:
-        with urlopen(CATALOG, timeout=30) as response:
+        with open_download(CATALOG, timeout=30) as (response, _):
             data = response.read()
         warning = ""
     except (URLError, OSError) as error:
@@ -84,8 +120,7 @@ def install(parent, target, name, branch, url, progress):
     with tempfile.TemporaryDirectory(prefix="olid65-", dir=parent.parent) as tmp:
         work = Path(tmp)
         archive = work / "plugin.zip"
-        with urlopen(url, timeout=45) as response, archive.open("wb") as output:
-            size = int(response.headers.get("Content-Length") or 0)
+        with open_download(url, timeout=45) as (response, size), archive.open("wb") as output:
             received = 0
             while True:
                 chunk = response.read(256 * 1024)
